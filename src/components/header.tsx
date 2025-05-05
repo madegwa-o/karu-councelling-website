@@ -6,8 +6,13 @@ export default function Header() {
         <header className="flex justify-between items-center p-2 bg-black text-white sticky top-0 z-10 shadow-md">
             {/* Left Section: Logo */}
             <div className="flex items-center gap-4">
-                <img src={icon} alt="icon" className="h-8 w-8" />
-                <span className="font-bold text-lg">Reddit Clone</span>
+                <img
+                    src={icon}
+                    alt="icon"
+                    className="h-12 w-12 rounded-lg hover:scale-105 transition-transform duration-300"
+                    style={{ height: "50px", width: "50px" }}
+                />
+                <span className="font-bold text-lg">kc club</span>
             </div>
 
             {/* Middle Section: Search Bar */}
