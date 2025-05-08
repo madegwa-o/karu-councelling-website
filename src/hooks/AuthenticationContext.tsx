@@ -3,8 +3,12 @@ import {createContext, useState, useContext, Dispatch, SetStateAction, ReactNode
 type AuthContextType = {
     accessToken: string;
     setAccessToken: Dispatch<SetStateAction<string>>;
+    baseUrl: string;
+    productionUrl: string;
+};
 
-}
+let contextRef = null
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -18,10 +22,48 @@ export function useAuthentication() {
 
 export function AuthenticationProvider({children}: {children: ReactNode})  {
     const [accessToken, setAccessToken] = useState<string>(' ');
+    const baseUrl = import.meta.env.VITE_BASE_URL;
+    const productionUrl = import.meta.env.VITE_PRODUCTION_URL;
+
+
+    const login = async (username, password) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Login failed');
+            }
+
+            const data = await response.json();
+            setAccessToken(data.accessToken);
+        } catch (error) {
+            console.error(error.message);
+        }
+    };
+
+
+    const logout = () => {
+        setAccessToken('');
+    };
+
+    const contextValue = {accessToken, setAccessToken,  login, logout};
+    contextRef = contextValue;
+
+
+
 
     return (
-        <AuthContext.Provider value={{accessToken, setAccessToken}}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     )
 }
+
+export const getAuthContext = () => contextRef;

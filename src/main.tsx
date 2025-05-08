@@ -1,47 +1,54 @@
+import './global-polyfill';
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import {createBrowserRouter,RouterProvider} from "react-router-dom";
-import LoginPage from "./pages/login.tsx";
-import Home from "./pages/home.tsx";
-import ErrorPage from "./pages/errorPage.tsx";
-import CommunitiesPage from "./pages/communities.tsx";
-import Member from "./pages/members.tsx";
-import {ThemeProvider} from "./hooks/ThemeContext.tsx";
+import  ThemeContextProvider from "./hooks/themeProvider.tsx";
 import {AuthenticationProvider} from "./hooks/AuthenticationContext.tsx";
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import BaseLayout from './BaseLayout.tsx';
+import HomePage from './pages/home/homePage.tsx';
+import {Settings} from "lucide-react";
+import Login from "./pages/login/login.tsx";
+import Register from "./pages/register/register.tsx";
+import ErrorPage from "./pages/errorPage.tsx";
 
 const router = createBrowserRouter([
-
     {
         path: '/',
-        element: <Home />,
+        element: <BaseLayout />,
         errorElement: <ErrorPage />,
-    },
-    {
-        path: '/login',
-        element: <LoginPage/>,
-        errorElement: <ErrorPage />,
-    },
-    {
-        path: '/communities',
-        element: <CommunitiesPage/>,
-        errorElement: <ErrorPage/>,
         children: [
             {
-                path: '/communities/:member',
-                element: <Member/>
+                path: '/',
+                element: <HomePage />,
+                errorElement: <ErrorPage />,
+            },
+
+            {
+                path: '/settings',
+                element: <Settings />,
+                errorElement: <ErrorPage />,
             }
         ]
-    }
-])
+    },
+    // Login and Register routes outside of the BaseLayout
+    {
+        path: '/login',
+        element: <Login />,
+    },
+    {
+        path: '/register',
+        element: <Register />,
+    },
+]);
 
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-      <ThemeProvider>
+      <ThemeContextProvider>
           <AuthenticationProvider>
               <RouterProvider router={router}/>
           </AuthenticationProvider>
-      </ThemeProvider>
+      </ThemeContextProvider>
   </StrictMode>,
 )
