@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import styles from './HomePage.module.css';
 import clubImage from '../../assets/club1.png'
 import clubImage1 from '../../assets/club1.png'
+import {useAuthentication} from "../../hooks/AuthenticationContext.tsx";
+import {useParams} from "react-router-dom";
 
 
 enum ContentType {
@@ -9,46 +11,73 @@ enum ContentType {
     ARTICLE = 'ARTICLE'
 }
 
+type Feed =  {
+    id: number,
+    type: ContentType,
+    subGroup: string,
+    author: string,
+    title: string,
+    content: string,
+    upvotes: number,
+    comments: number,
+    timePosted: string,
+    image: string
+}
+
 export default function HomePage() {
-    // Mock data for posts
-    const [posts, setPosts] = useState([
-        {
-            id: 1,
-            type: ContentType.TESTIMONIAL,
-            subGroup: 'Peer Support Group',
-            author: 'John Doe',
-            title: 'How peer support helped me find balance',
-            content: 'Joining the Peer Support Group gave me a safe space to share my struggles...',
-            upvotes: 102,
-            comments: 15,
-            timePosted: '2 days ago',
-            image: null
-        },
-        {
-            id: 2,
-            type: ContentType.ARTICLE,
-            subGroup: 'Personal Growth',
-            author: 'Counseling Team',
-            title: '5 Ways to Build Resilience During Tough Times',
-            content: 'Resilience is the ability to bounce back from challenges...',
-            upvotes: 320,
-            comments: 23,
-            timePosted: '1 week ago',
-            image: clubImage1
-        },
-        {
-            id: 3,
-            type: ContentType.TESTIMONIAL,
-            subGroup: 'Women’s Support Group',
-            author: 'Jane Smith',
-            title: 'My journey to self-confidence',
-            content: 'The Women’s Support Group helped me rediscover my strengths...',
-            upvotes: 89,
-            comments: 10,
-            timePosted: '3 days ago',
-            image: clubImage
+    const { filter } = useParams();
+    const {baseUrl} = useAuthentication()
+    const [feeds, setFeeds] = useState<Feed[]>([]);
+    const [nextPageUrl, setNextPageUrl] = useState(`${baseUrl}/api/v1/feeds?filter=${filter}&page=0&size=10`);
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+
+    // Fetch Feeds Function
+    const fetchFeeds = useCallback(async () => {
+        if (!nextPageUrl || isLoading) return;
+
+        setIsLoading(true);
+        try {
+            const response = await fetch(nextPageUrl);
+            const data = await response.json();
+
+            setFeeds((prevFeeds) => [...prevFeeds, ...data._embedded.feedList]);
+            setNextPageUrl(data._links.next?.href || null);
+            setHasMore(!!data._links.next);
+        } catch (error) {
+            console.error('Error fetching feeds:', error);
+        } finally {
+            setIsLoading(false);
         }
-    ]);
+    }, [nextPageUrl, isLoading]);
+
+    // Intersection Observer for Endless Scrolling
+    const observer = useCallback((node) => {
+        if (isLoading) return;
+
+        const handleObserver = (entries) => {
+            if (entries[0].isIntersecting && hasMore) {
+                fetchFeeds();
+            }
+        };
+
+        const options = { threshold: 1.0 };
+        const intersectionObserver = new IntersectionObserver(handleObserver, options);
+
+        if (node) intersectionObserver.observe(node);
+
+        return () => {
+            if (node) intersectionObserver.unobserve(node);
+        };
+    }, [fetchFeeds, isLoading, hasMore]);
+
+    useEffect(() => {
+        setNextPageUrl(`${baseUrl}/api/v1/feeds?filter=${filter}&page=0&size=10`);
+        fetchFeeds(); // Initial fetch
+    }, [filter]);
+
+
+
     return (
         <div className={styles.homePage}>
             <div className={styles.feedContainer}>
@@ -87,9 +116,9 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Main feed posts */}
+                {/* Main feed feeds */}
                 <div className={styles.posts}>
-                    {posts.map(post => (
+                    {feeds.map(post => (
                         <div key={post.id} className={styles.post}>
                             {/* Vote controls */}
                             <div className={styles.voteControls}>
@@ -109,7 +138,7 @@ export default function HomePage() {
                             {/* Post content */}
                             <div className={styles.postContent}>
                                 <div className={styles.postHeader}>
-                                    <span className={styles.subreddit}>{post.community}</span>
+                                    <span className={styles.subreddit}>{post.subGroup}</span>
                                     <span className={styles.postedBy}>Posted by u/{post.author} {post.timePosted}</span>
                                 </div>
                                 <h3 className={styles.postTitle}>{post.title}</h3>
@@ -155,6 +184,10 @@ export default function HomePage() {
                             </div>
                         </div>
                     ))}
+                    {isLoading && <div className={styles.loader}>Loading...</div>}
+
+                    {/* Trigger for Intersection Observer */}
+                    <div ref={observer} style={{ height: '20px' }} />
                 </div>
             </div>
 
@@ -163,9 +196,9 @@ export default function HomePage() {
                 {/* Premium card */}
                 <div className={styles.card}>
                     <div className={styles.premiumCard}>
-                        <h3>Next Event</h3>
-                        <p>We are visiting the world health organisation</p>
-                        <button className={styles.premiumButton}>Sign Up Now</button>
+                        <h3>Emergency Hotline</h3>
+                        <p>Is there an emergency?</p>
+                        <button className={styles.premiumButton}>Call Now</button>
                     </div>
                 </div>
 

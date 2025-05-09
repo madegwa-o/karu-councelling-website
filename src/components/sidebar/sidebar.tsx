@@ -38,13 +38,13 @@ const RedditSidebar = () => {
                 <h3>Feeds</h3>
                 <ul>
                     <li>
-                        <Link to="/feeds" className={styles.navLink}>All</Link>
+                        <Link to="/all" className={styles.navLink}>All</Link>
                     </li>
                     <li>
                         <Link to="/articles" className={styles.navLink}>Articles</Link>
                     </li>
                     <li>
-                        <Link to="/homes/all" className={styles.navLink}>Testimonials</Link>
+                        <Link to="/testimonials" className={styles.navLink}>Testimonials</Link>
                     </li>
                 </ul>
             </div>
@@ -65,16 +65,13 @@ const RedditSidebar = () => {
                 <h3>Counsellors</h3>
                 <ul>
                     <li>
-                        <Link to="/counsellors/main" className={styles.navLink}>Main Counsellors</Link>
+                        <Link to="/counsellors/MAINCOUNSELLOR" className={styles.navLink}>Main Counsellors</Link>
                     </li>
                     <li>
-                        <Link to="/counsellors/peer" className={styles.navLink}>Peer Counsellors</Link>
+                        <Link to="/counsellors/PEERCOUNSELLOR" className={styles.navLink}>Peer Counsellors</Link>
                     </li>
                     <li>
-                        <Link to="/counsellors/join" className={styles.navLink}>Join us</Link>
-                    </li>
-                    <li>
-                        <Link to="/map" className={styles.navLink}>Map</Link>
+                        <Link to="/counsellors/new" className={styles.navLink}>Join us</Link>
                     </li>
 
                 </ul>

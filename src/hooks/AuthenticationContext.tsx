@@ -22,13 +22,14 @@ export function useAuthentication() {
 
 export function AuthenticationProvider({children}: {children: ReactNode})  {
     const [accessToken, setAccessToken] = useState<string>(' ');
-    const baseUrl = import.meta.env.VITE_BASE_URL;
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const productionUrl = import.meta.env.VITE_PRODUCTION_URL;
+
 
 
     const login = async (username, password) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/login`, {
+            const response = await fetch(`${backendUrl}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ export function AuthenticationProvider({children}: {children: ReactNode})  {
         setAccessToken('');
     };
 
-    const contextValue = {accessToken, setAccessToken,  login, logout};
+    const contextValue = {accessToken, setAccessToken,  login, logout, baseUrl: backendUrl, productionUrl};
     contextRef = contextValue;
 
 
